@@ -1,4 +1,4 @@
-import { JWT } from './generateToken';
+import { JWT } from './Jwt';
 
 const jwt = new JWT();
 const payload = {
