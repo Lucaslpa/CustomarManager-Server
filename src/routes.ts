@@ -3,6 +3,6 @@ import { AdministratorController } from './controllers';
 
 const router = Router();
 
-router.get('/', AdministratorController.callTest);
+router.put('/administrator/create', AdministratorController.create);
 
 export default router;

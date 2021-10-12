@@ -21,7 +21,7 @@ describe('AdministratorModel', () => {
   });
   it('should get a administrator from administrator database', async () => {
     const test = await model.add(administrator);
-    const res = await model.get(test._id);
+    const res = await model.get(administrator.username);
     expect(res.username).toBe(test.username);
   });
 });

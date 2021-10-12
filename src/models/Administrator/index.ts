@@ -13,8 +13,8 @@ export class AdministratorModel {
     return res;
   }
 
-  async get(id: string) {
-    const res = await this.administratorModel.findOne({ _id: id });
+  async get(username: string) {
+    const res = await this.administratorModel.findOne({ username });
     return res;
   }
 }
