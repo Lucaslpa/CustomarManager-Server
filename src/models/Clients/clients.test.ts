@@ -45,7 +45,7 @@ describe('ClientsModel', () => {
 
   it('should get a client from Client database', async () => {
     const clientToDelete = await model.add(client);
-    const res = await model.get(clientToDelete._id);
+    const res = await model.get(clientToDelete.cpf);
     expect(res.cpf).toBe(clientToDelete.cpf);
   });
 });

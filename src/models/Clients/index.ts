@@ -23,8 +23,8 @@ export class ClientsModel {
     return res;
   }
 
-  async get(id: string) {
-    const res = await this.clientsModel.findOne({ _id: id });
+  async get(cpf: string) {
+    const res = await this.clientsModel.findOne({ cpf });
     return res;
   }
 }

@@ -10,5 +10,5 @@ App.use(express.urlencoded({ extended: true }));
 App.use(router);
 
 App.listen(2000, () => {
-  console.log('escutasndo na porta 2000');
+  console.log('rodando servidor  em localhost:2000/');
 });
