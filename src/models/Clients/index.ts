@@ -32,8 +32,9 @@ export class ClientsModel {
   async getMany(page: number) {
     const options = {
       page,
-      limit: 10,
+      limit: 5,
       customLabels: { totalPages: 'pageCount' },
+      sort: { created_at: -1 },
     };
     const res = await this.clientsModel.paginate({}, options);
     return res;
