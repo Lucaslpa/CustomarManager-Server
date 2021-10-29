@@ -34,8 +34,7 @@ export class Clients {
     if (!authorization) {
       return httpResponse(401, { error: 'error: unauthorized' }, res);
     }
-    const isRepeated = await clientsModel.get(cpf);
-
+    const isRepeated = await clientsModel.get('', cpf);
     const token = authorization.split(' ')[1];
     const tokenIsValid = jwt.verifyToken(`${token}`);
 
@@ -73,19 +72,6 @@ export class Clients {
     const { id } = req.params;
     const { authorization } = req.headers;
 
-    if (
-      !id ||
-      !address ||
-      !cpf ||
-      !birthday ||
-      !email ||
-      !name ||
-      !phone ||
-      !surname
-    ) {
-      return httpResponse(400, { error: 'error: without some data' }, res);
-    }
-
     if (!authorization) {
       return httpResponse(401, { error: 'error: unauthorized' }, res);
     }
@@ -111,7 +97,7 @@ export class Clients {
       return httpResponse(500, { error: 'something was wrong' }, res);
     }
 
-    return httpResponse(200, { success: `${name} was updated` }, res);
+    return httpResponse(200, { success: `id ${id} was updated` }, res);
   }
 
   async delete(req: Request, res: Response) {
@@ -140,7 +126,7 @@ export class Clients {
   }
 
   async get(req: Request, res: Response) {
-    const { cpf } = req.params;
+    const { id } = req.params;
 
     const { authorization } = req.headers;
 
@@ -154,10 +140,60 @@ export class Clients {
       return httpResponse(401, { error: 'error: unauthorized' }, res);
     }
 
-    const client = await clientsModel.get(cpf);
+    const client = await clientsModel.get(id);
 
-    if (!client) { return httpResponse(404, { error: 'error: client not found' }, res); }
+    if (!client) {
+      return httpResponse(404, { error: 'error: client not found' }, res);
+    }
 
     return httpResponse(200, { client }, res);
+  }
+
+  async getMany(req: Request, res: Response) {
+    const { page } = req.query;
+
+    const { authorization } = req.headers;
+
+    if (!authorization) {
+      return httpResponse(401, { error: 'error: unauthorized' }, res);
+    }
+
+    const token = authorization.split(' ')[1];
+    const tokenIsValid = jwt.verifyToken(`${token}`);
+    if (!tokenIsValid) {
+      return httpResponse(401, { error: 'error: unauthorized' }, res);
+    }
+
+    const clients = await clientsModel.getMany(Number(page));
+
+    if (!clients) {
+      return httpResponse(404, { error: 'error: client not found' }, res);
+    }
+
+    return httpResponse(200, { clients }, res);
+  }
+
+  async deleteMany(req: Request, res: Response) {
+    const { ids } = req.body;
+
+    const { authorization } = req.headers;
+
+    if (!authorization) {
+      return httpResponse(401, { error: 'error: unauthorized' }, res);
+    }
+
+    const token = authorization.split(' ')[1];
+    const tokenIsValid = jwt.verifyToken(`${token}`);
+    if (!tokenIsValid) {
+      return httpResponse(401, { error: 'error: unauthorized' }, res);
+    }
+
+    const clients = await clientsModel.deleteMany(ids);
+
+    if (!clients) {
+      return httpResponse(404, { error: 'error: client not found' }, res);
+    }
+
+    return httpResponse(200, { clients }, res);
   }
 }

@@ -1,10 +1,10 @@
-import mongoose from 'mongoose';
 import { ClientsTypes } from '../../types/Clients';
+import { Model } from '../../db/Schemas/Clients';
 
 export class ClientsModel {
   private clientsModel;
 
-  constructor(model: typeof mongoose.Model) {
+  constructor(model: Model) {
     this.clientsModel = model;
   }
 
@@ -23,8 +23,24 @@ export class ClientsModel {
     return res;
   }
 
-  async get(cpf: string) {
-    const res = await this.clientsModel.findOne({ cpf });
+  async get(id?: string, cpf?: string) {
+    const query = id ? { _id: id } : { cpf };
+    const res = await this.clientsModel.findOne(query);
+    return res;
+  }
+
+  async getMany(page: number) {
+    const options = {
+      page,
+      limit: 10,
+      customLabels: { totalPages: 'pageCount' },
+    };
+    const res = await this.clientsModel.paginate({}, options);
+    return res;
+  }
+
+  async deleteMany(ids: string[]) {
+    const res = await this.clientsModel.deleteMany({ _id: { $in: ids } });
     return res;
   }
 }

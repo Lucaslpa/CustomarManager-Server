@@ -12,7 +12,6 @@ export class Administrator {
   async create(req: Request, res: Response) {
     const { username, password }: AdministratorTypes = req.body;
     const passwordEncrypted = await bcrypt.encrypt(password);
-    const isRepeated = await administratorModel.get(username);
 
     if (!username) {
       return httpResponse(400, { error: 'error: without username' }, res);
@@ -21,7 +20,7 @@ export class Administrator {
     if (!password) {
       return httpResponse(400, { error: 'error: without password' }, res);
     }
-
+    const isRepeated = await administratorModel.get(username);
     if (isRepeated) {
       return httpResponse(
         400,
@@ -43,7 +42,6 @@ export class Administrator {
 
   async login(req: Request, res: Response) {
     const { username, password }: AdministratorTypes = req.body;
-    const admFromDB = await administratorModel.get(username);
 
     if (!username) {
       return httpResponse(400, { error: 'error: without username' }, res);
@@ -52,6 +50,7 @@ export class Administrator {
     if (!password) {
       return httpResponse(400, { error: 'error: without password' }, res);
     }
+    const admFromDB = await administratorModel.get(username);
 
     if (!admFromDB) {
       return httpResponse(
@@ -60,7 +59,10 @@ export class Administrator {
         res
       );
     }
-    const passwordIsCorrect = await bcrypt.compare(password, admFromDB.password);
+    const passwordIsCorrect = await bcrypt.compare(
+      password,
+      admFromDB.password
+    );
 
     if (!passwordIsCorrect) {
       return httpResponse(400, { error: 'error: incorrect password' }, res);
