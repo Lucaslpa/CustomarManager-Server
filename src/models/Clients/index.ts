@@ -10,11 +10,14 @@ export class ClientsModel {
 
   async add(client: ClientsTypes) {
     const res = await this.clientsModel.create(client);
+
     return res;
   }
 
   async delete(id: string) {
-    const res = await this.clientsModel.deleteOne({ _id: id });
+    const res = await this.clientsModel.deleteOne({
+      _id: id,
+    });
     return res;
   }
 
@@ -23,9 +26,13 @@ export class ClientsModel {
     return res;
   }
 
-  async get(id?: string, cpf?: string) {
-    const query = id ? { _id: id } : { cpf };
-    const res = await this.clientsModel.findOne(query);
+  async get(id: string) {
+    const res = await this.clientsModel.findOne({ _id: id });
+    return res;
+  }
+
+  async getByCpf(cpf: string) {
+    const res = await this.clientsModel.findOne({ cpf });
     return res;
   }
 

@@ -34,7 +34,7 @@ export class Clients {
     if (!authorization) {
       return httpResponse(401, { error: 'Unauthorized' }, res);
     }
-    const isRepeated = await clientsModel.get('', cpf);
+    const isRepeated = await clientsModel.getByCpf(cpf);
     const token = authorization.split(' ')[1];
     const tokenIsValid = jwt.verifyToken(`${token}`);
 

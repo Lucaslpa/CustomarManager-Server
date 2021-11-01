@@ -23,7 +23,7 @@ describe('ClientsModel', () => {
 
   it('should add a client to Client database', async () => {
     const res = await model.add(client);
-    expect(res.cpf).toBe(client.cpf);
+    expect(res._id).toBeTruthy();
   });
   it('should delete a client from Client database', async () => {
     const clientToDelete = await model.add(client);
@@ -44,8 +44,10 @@ describe('ClientsModel', () => {
   });
 
   it('should get a client from Client database', async () => {
-    const clientToDelete = await model.add(client);
-    const res = await model.get(clientToDelete.cpf);
-    expect(res.cpf).toBe(clientToDelete.cpf);
+    const customer = await model.add(client);
+    const res = await model.get(customer._id);
+    expect(res).not.toBe(null);
+
+    expect(res?._id).toBeTruthy();
   });
 });
