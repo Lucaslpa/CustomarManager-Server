@@ -29,21 +29,21 @@ export class Clients {
       !phone ||
       !surname
     ) {
-      return httpResponse(400, { error: 'error: without some data' }, res);
+      return httpResponse(400, { error: 'Wrong request' }, res);
     }
     if (!authorization) {
-      return httpResponse(401, { error: 'error: unauthorized' }, res);
+      return httpResponse(401, { error: 'Unauthorized' }, res);
     }
     const isRepeated = await clientsModel.get('', cpf);
     const token = authorization.split(' ')[1];
     const tokenIsValid = jwt.verifyToken(`${token}`);
 
     if (!tokenIsValid) {
-      return httpResponse(401, { error: 'error: unauthorized' }, res);
+      return httpResponse(401, { error: 'Unauthorized' }, res);
     }
 
     if (isRepeated) {
-      return httpResponse(400, { error: 'error: client already exist' }, res);
+      return httpResponse(409, { error: 'Customer already exist' }, res);
     }
 
     const newClient = await clientsModel.add({
@@ -73,14 +73,14 @@ export class Clients {
     const { authorization } = req.headers;
 
     if (!authorization) {
-      return httpResponse(401, { error: 'error: unauthorized' }, res);
+      return httpResponse(401, { error: 'Unauthorized' }, res);
     }
 
     const token = authorization.split(' ')[1];
     const tokenIsValid = jwt.verifyToken(`${token}`);
 
     if (!tokenIsValid) {
-      return httpResponse(401, { error: 'error: unauthorized' }, res);
+      return httpResponse(401, { error: 'Unauthorized' }, res);
     }
 
     try {
@@ -94,10 +94,10 @@ export class Clients {
         surname,
       });
     } catch (e) {
-      return httpResponse(500, { error: 'something was wrong' }, res);
+      return httpResponse(500, { error: 'Something Was wrong' }, res);
     }
 
-    return httpResponse(200, { success: `id ${id} was updated` }, res);
+    return httpResponse(200, { success: `Customer ${name} updated` }, res);
   }
 
   async delete(req: Request, res: Response) {

@@ -14,19 +14,15 @@ export class Administrator {
     const passwordEncrypted = await bcrypt.encrypt(password);
 
     if (!username) {
-      return httpResponse(400, { error: 'error: without username' }, res);
+      return httpResponse(400, { error: 'Without username' }, res);
     }
 
     if (!password) {
-      return httpResponse(400, { error: 'error: without password' }, res);
+      return httpResponse(400, { error: 'Without password' }, res);
     }
     const isRepeated = await administratorModel.get(username);
     if (isRepeated) {
-      return httpResponse(
-        400,
-        { error: 'error: this administrator already exist' },
-        res
-      );
+      return httpResponse(400, { error: 'Administrator already exist' }, res);
     }
 
     if (typeof passwordEncrypted === 'string') {
@@ -44,20 +40,16 @@ export class Administrator {
     const { username, password }: AdministratorTypes = req.body;
 
     if (!username) {
-      return httpResponse(400, { error: 'error: without username' }, res);
+      return httpResponse(400, { error: 'Without username' }, res);
     }
 
     if (!password) {
-      return httpResponse(400, { error: 'error: without password' }, res);
+      return httpResponse(400, { error: 'Without password' }, res);
     }
     const admFromDB = await administratorModel.get(username);
 
     if (!admFromDB) {
-      return httpResponse(
-        400,
-        { error: 'error: this administrator none exist' },
-        res
-      );
+      return httpResponse(400, { error: 'Administrator not founded' }, res);
     }
     const passwordIsCorrect = await bcrypt.compare(
       password,
@@ -65,7 +57,7 @@ export class Administrator {
     );
 
     if (!passwordIsCorrect) {
-      return httpResponse(400, { error: 'error: incorrect password' }, res);
+      return httpResponse(400, { error: 'Incorrect Password' }, res);
     }
 
     const token = jwt.generateToken({
