@@ -10,6 +10,7 @@ App.use(express.json());
 App.use(express.urlencoded({ extended: true }));
 App.use(router);
 
-App.listen(2000, () => {
+const PORT = process.env.PORT || 2000;
+App.listen(PORT, () => {
   console.log('rodando servidor em : localhost:2000/');
 });
