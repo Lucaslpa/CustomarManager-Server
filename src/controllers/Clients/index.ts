@@ -98,7 +98,7 @@ export class Clients {
 
       res.status(200).json({ clients });
     } catch (err) {
-      res.status(500).json({ error: 'sss' });
+      res.status(500).json({ error: 'something was wrong' });
     }
   }
 
