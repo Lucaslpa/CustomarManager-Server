@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { httpResponse } from '../../utils/httpResponses';
 import { administratorModel } from '../../models';
 import { AdministratorTypes } from '../../types/Administrator';
 import { BCRYPT } from '../../utils/bcrypt';
@@ -12,58 +11,25 @@ export class Administrator {
   async create(req: Request, res: Response) {
     const { username, password }: AdministratorTypes = req.body;
     const passwordEncrypted = await bcrypt.encrypt(password);
+    const passwordIsEncrypted = typeof passwordEncrypted === 'string';
 
-    if (!username) {
-      return httpResponse(400, { error: 'Without username' }, res);
+    if (!passwordIsEncrypted) {
+      res.status(500).json({ error: 'something was wrong' });
+      return;
     }
 
-    if (!password) {
-      return httpResponse(400, { error: 'Without password' }, res);
-    }
-    const isRepeated = await administratorModel.get(username);
-    if (isRepeated) {
-      return httpResponse(400, { error: 'Administrator already exist' }, res);
-    }
-
-    if (typeof passwordEncrypted === 'string') {
-      const administrator = await administratorModel.add({
-        username,
-        password: passwordEncrypted,
-      });
-      return httpResponse(200, { administrator }, res);
-    }
-
-    return httpResponse(500, { error: 'unknown error' }, res);
+    const administrator = await administratorModel.add({
+      username,
+      password: passwordEncrypted,
+    });
+    res.status(200).json({ administrator });
   }
 
   async login(req: Request, res: Response) {
-    const { username, password }: AdministratorTypes = req.body;
-
-    if (!username) {
-      return httpResponse(400, { error: 'Without username' }, res);
-    }
-
-    if (!password) {
-      return httpResponse(400, { error: 'Without password' }, res);
-    }
-    const admFromDB = await administratorModel.get(username);
-
-    if (!admFromDB) {
-      return httpResponse(400, { error: 'Administrator not founded' }, res);
-    }
-    const passwordIsCorrect = await bcrypt.compare(
-      password,
-      admFromDB.password
-    );
-
-    if (!passwordIsCorrect) {
-      return httpResponse(400, { error: 'Incorrect Password' }, res);
-    }
-
     const token = jwt.generateToken({
-      id: admFromDB._id,
-      username: admFromDB.username,
+      id: res.locals.administrator._id,
+      username: res.locals.administrator.username,
     });
-    return httpResponse(200, { token }, res);
+    res.status(200).json({ token });
   }
 }

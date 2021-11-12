@@ -27,13 +27,17 @@ export class ClientsModel {
   }
 
   async get(id: string) {
-    const res = await this.clientsModel.findOne({ _id: id });
+    const res = await this.clientsModel.findById(id);
     return res;
   }
 
   async getByCpf(cpf: string) {
-    const res = await this.clientsModel.findOne({ cpf });
-    return res;
+    try {
+      const res = await this.clientsModel.findOne({ cpf });
+      return res;
+    } catch (err) {
+      return 'error';
+    }
   }
 
   async getMany(page: number) {

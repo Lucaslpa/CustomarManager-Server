@@ -1,10 +1,6 @@
 import { Request, Response } from 'express';
-import { httpResponse } from '../../utils/httpResponses';
 import { clientsModel } from '../../models';
 import { ClientsTypes } from '../../types/Clients';
-import { JWT } from '../../utils/jwt/Jwt';
-
-const jwt = new JWT();
 
 export class Clients {
   async create(req: Request, res: Response) {
@@ -18,34 +14,6 @@ export class Clients {
       surname,
     }: ClientsTypes = req.body;
 
-    const { authorization } = req.headers;
-
-    if (
-      !address ||
-      !cpf ||
-      !birthday ||
-      !email ||
-      !name ||
-      !phone ||
-      !surname
-    ) {
-      return httpResponse(400, { error: 'Wrong request' }, res);
-    }
-    if (!authorization) {
-      return httpResponse(401, { error: 'Unauthorized' }, res);
-    }
-    const isRepeated = await clientsModel.getByCpf(cpf);
-    const token = authorization.split(' ')[1];
-    const tokenIsValid = jwt.verifyToken(`${token}`);
-
-    if (!tokenIsValid) {
-      return httpResponse(401, { error: 'Unauthorized' }, res);
-    }
-
-    if (isRepeated) {
-      return httpResponse(409, { error: 'Customer already exist' }, res);
-    }
-
     const newClient = await clientsModel.add({
       address,
       cpf,
@@ -56,7 +24,7 @@ export class Clients {
       surname,
     });
 
-    return httpResponse(200, { newClient }, res);
+    res.status(200).json({ newClient });
   }
 
   async update(req: Request, res: Response) {
@@ -70,18 +38,6 @@ export class Clients {
       surname,
     }: ClientsTypes = req.body;
     const { id } = req.params;
-    const { authorization } = req.headers;
-
-    if (!authorization) {
-      return httpResponse(401, { error: 'Unauthorized' }, res);
-    }
-
-    const token = authorization.split(' ')[1];
-    const tokenIsValid = jwt.verifyToken(`${token}`);
-
-    if (!tokenIsValid) {
-      return httpResponse(401, { error: 'Unauthorized' }, res);
-    }
 
     try {
       await clientsModel.update(id, {
@@ -93,107 +49,76 @@ export class Clients {
         phone,
         surname,
       });
-    } catch (e) {
-      return httpResponse(500, { error: 'Something Was wrong' }, res);
-    }
 
-    return httpResponse(200, { success: `Customer ${name} updated` }, res);
+      res.status(200).json({ success: `customer ${name} was updated` });
+    } catch (e) {
+      res.status(500).json({
+        error: 'something was wrong. Maybe this customer not exists',
+      });
+    }
   }
 
   async delete(req: Request, res: Response) {
     const { id } = req.params;
 
-    const { authorization } = req.headers;
-
-    if (!authorization) {
-      return httpResponse(401, { error: 'error: unauthorized' }, res);
-    }
-
-    const token = authorization.split(' ')[1];
-    const tokenIsValid = jwt.verifyToken(`${token}`);
-
-    if (!tokenIsValid) {
-      return httpResponse(401, { error: 'error: unauthorized' }, res);
-    }
-
     try {
       await clientsModel.delete(id);
+      res.status(200).json({ success: 'customer was deleted' });
     } catch (e) {
-      return httpResponse(500, { error: 'something was wrong' }, res);
+      res
+        .status(500)
+        .json({ error: 'something was wrong. Maybe this customer not exists' });
     }
-
-    return httpResponse(200, { success: `id ${id} was deleted` }, res);
   }
 
   async get(req: Request, res: Response) {
     const { id } = req.params;
 
-    const { authorization } = req.headers;
+    try {
+      const client = await clientsModel.get(id);
 
-    if (!authorization) {
-      return httpResponse(401, { error: 'error: unauthorized' }, res);
+      if (!client) {
+        res.status(404).json({ error: 'Customer not found' });
+      }
+
+      res.status(200).json({ client });
+    } catch (err) {
+      res.status(500).json({ error: 'something was wrong' });
     }
-
-    const token = authorization.split(' ')[1];
-    const tokenIsValid = jwt.verifyToken(`${token}`);
-    if (!tokenIsValid) {
-      return httpResponse(401, { error: 'error: unauthorized' }, res);
-    }
-
-    const client = await clientsModel.get(id);
-
-    if (!client) {
-      return httpResponse(404, { error: 'error: client not found' }, res);
-    }
-
-    return httpResponse(200, { client }, res);
   }
 
   async getMany(req: Request, res: Response) {
-    const { page } = req.query;
+    const { page } = req.params;
 
-    const { authorization } = req.headers;
+    try {
+      const clients = await clientsModel.getMany(Number(page));
+      if (!clients) {
+        res.status(404).json({ error: 'clients not founded' });
+      }
 
-    if (!authorization) {
-      return httpResponse(401, { error: 'error: unauthorized' }, res);
+      res.status(200).json({ clients });
+    } catch (err) {
+      res.status(500).json({ error: 'sss' });
     }
-
-    const token = authorization.split(' ')[1];
-    const tokenIsValid = jwt.verifyToken(`${token}`);
-    if (!tokenIsValid) {
-      return httpResponse(401, { error: 'error: unauthorized' }, res);
-    }
-
-    const clients = await clientsModel.getMany(Number(page));
-
-    if (!clients) {
-      return httpResponse(404, { error: 'error: client not found' }, res);
-    }
-
-    return httpResponse(200, { clients }, res);
   }
 
   async deleteMany(req: Request, res: Response) {
     const { ids } = req.body;
 
-    const { authorization } = req.headers;
-
-    if (!authorization) {
-      return httpResponse(401, { error: 'error: unauthorized' }, res);
+    if (!ids || !ids.length) {
+      res.status(400).json({ error: 'none id was provided' });
     }
 
-    const token = authorization.split(' ')[1];
-    const tokenIsValid = jwt.verifyToken(`${token}`);
-    if (!tokenIsValid) {
-      return httpResponse(401, { error: 'error: unauthorized' }, res);
+    try {
+      const clients = await clientsModel.deleteMany(ids);
+
+      if (!clients) {
+        res.status(500).json({ error: 'nothing deleted' });
+      }
+
+      res.status(200).json({ clients });
+    } catch (err) {
+      res.status(500).json({ error: 'something was wrong' });
     }
-
-    const clients = await clientsModel.deleteMany(ids);
-
-    if (!clients) {
-      return httpResponse(404, { error: 'error: client not found' }, res);
-    }
-
-    return httpResponse(200, { clients }, res);
   }
 }
